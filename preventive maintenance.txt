@@ -1,0 +1,96 @@
+getwd()
+setwd()
+read.csv("P.Maintenance Project Document_2018.csv")
+
+
+read.csv("subject.csv")
+read.csv("P.Maintenance Project_dataset")
+read.csv("P.Maintenance_dataset.csv")
+maintenance<-read.csv("P.Maintenance_dataset.csv",header=TRUE,stringsAsFactors=TRUE)
+colnames(maintenance)<-c("serial_no","lifetime","broken","pressureInd_1","pressureInd_2","pressureInd_3","team","provider")
+dim(maintenance)
+str(maintenance)
+head(maintenance)
+tail(maintenance)
+colSums(is.na(maintenance))
+table(maintenance$team)
+table(maintenance$provider)
+table(maintenance$broken)
+table(maintenance$lifetime)
+par(mfrow=c(2,2))
+hist(maintenance$pressureInd_2)
+
+dev.off()
+summary(pressureInd_1)
+summary(maintenance$pressureInd_2)
+
+  maintenance$lifetime <- as.numeric(maintenance$lifetime)
+  lifetime<-maintenance$lifetime
+  team<-factor(c(TeamC,TeamB,TeamB,TeamA,TeamA,TeamA));
+  maintenance$team <- as.factor(maintenance$team)
+  maintenance$provider <- as.factor(maintenance$provider)
+str(team)
+library("ggplot2", lib.loc="~/R/win-library/3.4")
+qplot(maintenance$team)
+qplot(maintenance$provider)
+
+
+par(mfrow=c(2,2))
+boxplot(maintenance$pressureInd_3, ylab="pressureInd")
+
+str(maintenance)
+maintenance=maintenance[-1,]
+head(maintenance)
+maintenance$pressureInd_3=as.numeric(maintenance$pressureInd_3)
+maintenance$pressureInd_2=as.numeric(maintenance$pressureInd_2)
+maintenance$pressureInd_1=as.numeric(maintenance$pressureInd_1)
+
+boxplot(maintenance$pressureInd_3, ylab="pressureInd")
+boxplot(maintenance$pressureInd_2, ylab="pressureInd")
+boxplot(maintenance$pressureInd_1, ylab="pressureInd")
+
+data3 <- as.numeric(maintenance$pressureInd_2)
+str(data1)
+data3[data3 > 125]
+
+
+maintenance$broken <- as.numeric(maintenance$broken)
+broken<-maintenance$broken
+data2 <- as.numeric(maintenance$pressureInd_1)
+str(data2)
+data2[data2 < 30]
+str(maintenance)
+hist(broken)
+qplot(broken)
+  
+summary(maintenance)
+str(maintenance)
+
+head(lifetime)
+
+linearegmodel = lm(lifetime~ .-broken,data = maintenance)
+summary(linearegmodel)
+install.packages("survival")
+library(survival)
+dependentvars = Surv(maintenance$lifetime,maintenance$broken)
+survreg = survreg(dependentvars~ pressureInd_1+pressureInd_2+pressureInd_3+team+provider,dist = 'gaussian',data = maintenance)
+summary(survreg)
+lines(x = predict(survreg, type = "quantile",newdata = maintenance, p = seq(0.1, 0.99, by=0.01)),
+      y = rev(seq(0.1, 0.99, by = 0.01)),
+      col = "blue")
+pct<- 1:99/100
+Ebreak<-predict(survreg, newdata = maintenance, type = 'quantile',p=.5)
+
+Forecast=data.frame(Ebreak)
+Forecast$lifetime=maintenance$lifetime
+Forecast$broken=maintenance$broken
+Forecast$remainingLT=Forecast$Ebreak-Forecast$lifetime
+View(Forecast)
+Forecast=Forecast[order(Forecast$remainingLT),]
+Priority=Forecast[Forecast$broken==0,]
+View(Priority)
+library(RColorBrewer)
+barplot(table(Priority$remainingLT),col  = "purple")
+boxplot(Priority$lifetime,Priority$remainingLT,col=heat.colors(3))
+
+ggplot(maintenance, aes(x=Priority$remainingLt)) + geom_bar() + labs(y= "remainingLT", title = "breakdown prediction for preventive maintenance")
