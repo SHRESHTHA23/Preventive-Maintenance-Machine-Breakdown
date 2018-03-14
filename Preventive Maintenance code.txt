@@ -1,4 +1,4 @@
-setwd("/home/data/Forum_Jigsaw_Challenge/JigsawChallenge_and_contest_Jan_2018")
+
 getwd()
 
 #read the data
